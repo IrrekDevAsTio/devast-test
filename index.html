@@ -1,11 +1,72 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    hello word Faster Looy
-</body>
-</html>
+// Fonction principale qui sera exécutée dans la console du navigateur
+(function() {
+    let canvas = document.getElementById("canvas");  // Le canvas du jeu
+    let ctx = canvas.getContext("2d");
+
+    // Obtenir les données du jeu
+    function getGameData() {
+        return {
+            snakes: window.snakes || [],  // Liste des serpents
+            mySnake: window.mySnake || {},  // Votre serpent
+            food: window.food || [],  // Nourriture sur le terrain
+        };
+    }
+
+    // Fonction pour déplacer le serpent vers un objectif
+    function moveTowards(targetX, targetY) {
+        const mySnake = getGameData().mySnake;
+        const head = mySnake.body[0];
+
+        let dx = targetX - head.x;
+        let dy = targetY - head.y;
+
+        // Calculer l'angle vers la nourriture
+        let angle = Math.atan2(dy, dx);
+        
+        // Définir la vitesse du serpent (ici, valeur arbitraire)
+        const speed = 10;
+        const velocity = {
+            x: Math.cos(angle) * speed,
+            y: Math.sin(angle) * speed
+        };
+
+        // Déplacer le serpent
+        window.gameLoop.move(velocity.x, velocity.y);
+    }
+
+    // Trouver la nourriture la plus proche
+    function findClosestFood() {
+        const gameData = getGameData();
+        const mySnake = gameData.mySnake;
+        const foodList = gameData.food;
+
+        if (foodList.length === 0) return null;
+
+        let closestFood = null;
+        let minDistance = Infinity;
+
+        for (let food of foodList) {
+            let dx = food.x - mySnake.body[0].x;
+            let dy = food.y - mySnake.body[0].y;
+            let distance = Math.sqrt(dx * dx + dy * dy);
+
+            if (distance < minDistance) {
+                minDistance = distance;
+                closestFood = food;
+            }
+        }
+        return closestFood;
+    }
+
+    // Exécution de l'automatisation
+    function autoPlay() {
+        const closestFood = findClosestFood();
+
+        if (closestFood) {
+            moveTowards(closestFood.x, closestFood.y);
+        }
+    }
+
+    // Lancer l'automatisation toutes les 100ms
+    setInterval(autoPlay, 100);
+})();
